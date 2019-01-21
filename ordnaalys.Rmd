@@ -60,8 +60,12 @@ tvättade_regf %>%
   coord_flip() +
   theme_minimal() +
   labs(title = "Vanligast ord i svenska regeringsförklaringar",
-       x = "Ord", y = "Antal ord") +
+       subtitle = "Regeringsförklaringar 1976 - 2019",
+       x = "", y = "Antal ord",
+       caption = "Källa: regeringen.se") +
   scale_fill_viridis_d(guide = FALSE)
+
+ggsave("figure/vanligaste_ord.pdf", width = 10)
 ```
 
 Det är väl inte särskilt förvånande att Sverige toppar listan.
@@ -73,12 +77,16 @@ tvättade_regf %>%
   group_by(statsminister) %>%
   count(ord) %>%
   top_n(n = 10) %>%
-  ggplot(aes(x = drlib::reorder_within(ord, n, statsminister), y = n)) +
+  ggplot(aes(x = drlib::reorder_within(ord, n, statsminister), y = n, fill = statsminister)) +
   geom_col() +
   drlib::scale_x_reordered() +
   facet_wrap(~statsminister, scales = "free") +
   coord_flip() +
-  labs(x = "", y = "Antal ord")
+  labs(x = "", y = "Antal ord") +
+  scale_fill_viridis_d(guide = FALSE) +
+  theme_minimal()
+
+ggsave("figure/antal_ord_per_statsminister.pdf", width = 10, height = 8)
 ```
 
 Det här är intressant men vi stöter här på ett problem som är vanligt i textanalys. Vissa ord nämns väldigt ofta men är inte nödvändigtvis viktiga för det. Att Reinfeldt nämner arbete, ansvar och jobb är inte förvånande och har ett visst analysvärde, men att Olof Palme nämner regeringen flest gånger har inget större analytiskt värde.
@@ -154,6 +162,8 @@ tvättade_regf %>%
   theme_minimal() +
   scale_fill_viridis_d() +
   guides(fill = FALSE)
+
+ggsave("figure/medelvarde_antal_ord.pdf", width = 10)
 ```
 
 Den sista analysen vi gör av regeringsförklaringarna handlar om relationen mellan ord. Det vi gör då är helt enkel att räkna antalet gånger olika ord nämns tillsammans. Kort sagt räknar vi två ord i taget istället för ett ord i taget. 
@@ -223,6 +233,8 @@ ggraph(bigram_graph, layout = "fr") +
   geom_node_point() +
   geom_node_text(aes(label = name), repel = TRUE) +
   theme_void()
+
+ggsave("relation-mellan-ord.svg")
 ```
 
 
