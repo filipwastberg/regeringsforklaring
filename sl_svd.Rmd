@@ -1,5 +1,5 @@
 ---
-title: "Stefan Löfven"
+title: "Analys av regeringsförklaringar 1976-2019"
 author: "Filip Wästberg"
 date: '2019-01-21'
 output:
