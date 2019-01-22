@@ -222,7 +222,7 @@ tvättade_sl %>%
 ggsave("figure/sl_viktigaste_ord.png", width = 10, height = 8)
 ```
 
-Det sista vi är intresserade av är hur olika ord hänger samman i Stefan Löfvens regeringsförklaringar. Nedan redovisas relationen mellan ord i Löfvens regeringsförklaringar.
+Vi är intresserade av är hur olika ord hänger samman i Stefan Löfvens regeringsförklaringar. Nedan redovisas relationen mellan ord i Löfvens regeringsförklaringar.
 
 ```{r}
 bigram_regf <- sl %>%
@@ -268,3 +268,65 @@ ggraph(bigram_graph, layout = "fr") +
 ggsave("figure/sl_relation_mellan_ord.png", width = 10)
 ```
 
+Nedan analyserar vi relationen mellan ord i alla regeringsförklaringar.
+
+Med `tidytext` gör vi det genom att specificera hur många `ngrams` vi vill använda. Under motorhuven används här paketet `tokenizers`.
+
+```{r}
+bigram_regf <- regf %>%
+  filter(!is.na(statsminister)) %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+bigram_regf
+
+bigrams_separated <- bigram_regf %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
+
+bigrams_filtered <- bigrams_separated %>%
+  filter_at(vars(word1, word2), all_vars(!. %in% sv_stoppord$stoppord))
+
+# new bigram counts:
+bigram_counts <- bigrams_filtered %>% 
+  count(word1, word2, sort = TRUE)
+
+bigrams_united <- bigrams_filtered %>%
+  unite(bigram, word1, word2, sep = " ")
+
+bigram_tf_idf <- bigrams_united %>%
+  count(statsminister, bigram) %>%
+  bind_tf_idf(bigram, statsminister, n) %>%
+  arrange(desc(tf_idf))
+
+bigram_graph <- bigram_counts %>%
+  filter(n > 15) %>%
+  graph_from_data_frame()
+
+set.seed(2017)
+
+ggraph(bigram_graph, layout = "fr") +
+  geom_edge_link() +
+  geom_node_point() +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+
+ggsave("figure/relation-mellan-ord.png")
+```
+
+Nedan tar vi fram viktigast ord för respektive statsminister.
+
+```{r}
+tvättade_regf %>%
+  group_by(statsminister) %>%
+  count(ord) %>%
+  bind_tf_idf(ord, statsminister, n) %>%
+  arrange(-tf_idf) %>%
+  do(head(., n = 10)) %>%
+  ggplot(aes(x = drlib::reorder_within(ord, tf_idf, statsminister), y = tf_idf, fill = statsminister)) +
+  geom_col() +
+  drlib::scale_x_reordered() +
+  facet_wrap(~statsminister, scales = "free") +
+  coord_flip() +
+  labs(x = "", y = "Antal ord") +
+  scale_fill_viridis_d(guide = FALSE)
+
+ggsave("figure/tot_viktigaste_ord.png", width = 10, height = 8)
+```
