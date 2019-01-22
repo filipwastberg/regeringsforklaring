@@ -3,8 +3,8 @@ title: "Analys av regeringsförklaringar 1976-2019"
 author: "Filip Wästberg"
 date: '2019-01-21'
 output:
-  word_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 ## Bakgrund
-Analytikern Filip Wästberg från Ferrologic Analytics har analyserat analyserat alla regeringsförklaringar från 1976 fram till idag. Den första regeringsförklaringen som inte hölls av kungen var Torbjörn Fälldin 1976.
+Analytikern Filip Wästberg från Ferrologic Analytics har analyserat alla regeringsförklaringar från 1976 fram till idag. Den första regeringsförklaringen som inte hölls av kungen var Torbjörn Fälldin 1976.
 
 Hur skiljer sig de olika regeringsförklaringarna mot varandra och har Centerpartiet och Liberalernas stöd till regeringen ändrat årets regeringsförklaring?
 
@@ -38,17 +38,20 @@ tidy_sl <- sl %>%
   filter(!str_detect(text, "Regeringsförklaring")) %>%
   unnest_tokens(ord, text)
 
-sv_stoppord <- read_csv("stoppord.csv")
+sv_stoppord <- read_csv("stoppord.csv", locale = locale(encoding = 'latin1'))
 
 tvättade_sl <- tidy_sl %>%
   filter(!str_detect(ord, "[[:digit:]]")) %>%
   anti_join(get_stopwords(language = "sv"), by = c("ord" = "word")) %>%
   anti_join(sv_stoppord, by = c("ord" = "stoppord"))
 
-regf <- bind_rows(regf, sl19)
+## regf <- bind_rows(regf, sl %>% filter(datum == "2019-01-21"))
+
 tidy_regf <- regf %>%
+  bind_rows(sl19) %>%
   filter(!str_detect(text, "Regeringsförklaring")) %>%
   unnest_tokens(ord, text)
+
 tvättade_regf <- tidy_regf %>%
   filter(!str_detect(ord, "[[:digit:]]")) %>%
   anti_join(get_stopwords(language = "sv"), by = c("ord" = "word")) %>%
@@ -71,7 +74,7 @@ tvättade_regf %>%
        caption = "Källa: regeringen.se") +
   scale_fill_viridis_d(guide = FALSE)
 
-ggsave("figure/vanligaste_ord_totalt.pdf", width = 10)
+ggsave("figure/vanligaste_ord_totalt.png", width = 10)
 ```
 
 Att *Sverige* toppar listan är kanske inte så förvånande.
@@ -93,7 +96,7 @@ tvättade_regf %>%
   scale_fill_viridis_d(guide = FALSE) +
   theme_minimal()
 
-ggsave("figure/antal_ord_per_statsminister.pdf", width = 10, height = 8)
+ggsave("figure/antal_ord_per_statsminister.png", width = 10, height = 8)
 ```
 
 Vilka ord är de vanligaste i Stefan Löfvens regeringsförklaringar?
@@ -129,7 +132,7 @@ tvättade_sl %>%
   #scale_fill_discrete(guide = FALSE) +
   scale_fill_viridis_d(guide = FALSE)
 
-ggsave("figure/sl_antal_ord.pdf", width = 10, height = 8)
+ggsave("figure/sl_antal_ord.png", width = 10, height = 8)
 ```
 
 Hur har längden på regeringsförklaringar utvecklats över tid? Vi ser en tydlig trend där regeringsförklaringarna blir längre och längre.
@@ -149,7 +152,7 @@ tvättade_regf %>%
        caption = "Källa: regeringen.se") +
   scale_y_continuous(limits = c(0,3500))
 
-ggsave("figure/antal_ord_totalt_over_tid.pdf", width = 10)
+ggsave("figure/antal_ord_totalt_over_tid.png", width = 10)
 ```
 
 Och hur ser det ut specifikt för Stefan Löfven?
@@ -168,7 +171,7 @@ tvättade_sl %>%
        caption = "Källa: regeringen.se") +
   scale_y_continuous(limits = c(0,2500))
 
-ggsave("figure/sl_over_tid.pdf", width = 10)
+ggsave("figure/sl_over_tid.png", width = 10)
 ```
 
 Det är tydligt att regeringsförklaringarna blivit längre. Samtidigt är det relativt stor variation över tid. Vilken statsminister hade längst regeringsförklaringar? Nedan ser vi medelvärde för antal ord per regeringsförklaring för varje statsminister. 
@@ -191,7 +194,7 @@ tvättade_regf %>%
   scale_fill_viridis_d() +
   guides(fill = FALSE)
 
-ggsave("figure/medelvarde_antal_ord.pdf", width = 10)
+ggsave("figure/medelvarde_antal_ord.png", width = 10)
 ```
 
 ## Vilka är Stefan Löfvens viktigaste ord?
@@ -216,7 +219,7 @@ tvättade_sl %>%
   scale_fill_viridis_d(guide = FALSE) +
   theme_minimal()
 
-ggsave("figure/sl_viktigaste_ord.pdf", width = 10, height = 8)
+ggsave("figure/sl_viktigaste_ord.png", width = 10, height = 8)
 ```
 
 Det sista vi är intresserade av är hur olika ord hänger samman i Stefan Löfvens regeringsförklaringar. Nedan redovisas relationen mellan ord i Löfvens regeringsförklaringar.
@@ -262,6 +265,6 @@ ggraph(bigram_graph, layout = "fr") +
   geom_node_text(aes(label = name), repel = TRUE) +
   theme_void()
 
-#ggsave("figure/sl_relation_mellan_ord.pdf", width = 10)
+ggsave("figure/sl_relation_mellan_ord.png", width = 10)
 ```
 
