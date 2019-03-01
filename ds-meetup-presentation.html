@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Textanalys av Sveriges regeringsförklaring</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Filip Wästberg, Ferrologic" />
+    <meta name="date" content="2018-03-06" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Textanalys av Sveriges regeringsförklaring
+## 🕺 med R och tidytext
+### Filip Wästberg, Ferrologic
+### 2018-03-06
+
+---
+
+
+
+
+
+# Vad är en regeringsförklaring? &amp;#x1F937;
+
+---
+
+# Var finns regeringsförklaringen? 
+
+![](ds-meetup-presentation_files/figure-html/reg.png)
+
+---
+
+# Efter en del kodande och mycket copy paste
+
+
+```r
+library(tidyverse)
+regf &lt;- read_csv("regf.csv")
+```
+
+---
+
+# En data.frame med stycke, datum och statsminister
+
+
+```
+## # A tibble: 4,283 x 3
+##    text                                           datum      statsminister 
+##    &lt;chr&gt;                                          &lt;date&gt;     &lt;chr&gt;         
+##  1 Regeringsförklaring, 19761008, Torbjörn Fälld… 1976-10-08 Torbjörn Fäll…
+##  2 Regeringspartierna är ense om att finansdepar… 1976-10-08 Torbjörn Fäll…
+##  3 I anslutning till denna anmälan vill jag ge r… 1976-10-08 Torbjörn Fäll…
+##  4 Enighet har alltså nåtts mellan Centerpartiet… 1976-10-08 Torbjörn Fäll…
+##  5 Med fasthet och ansvar skall vi föra en polit… 1976-10-08 Torbjörn Fäll…
+##  6 Regeringen skall sträva efter att bryta tende… 1976-10-08 Torbjörn Fäll…
+##  7 Tryggheten för alla generationer och grupper … 1976-10-08 Torbjörn Fäll…
+##  8 Den sociala marknadshushållningen förstärks g… 1976-10-08 Torbjörn Fäll…
+##  9 Regeringen skall föra en politik för sysselsä… 1976-10-08 Torbjörn Fäll…
+## 10 Sträng hushållning måste ske med naturtillgån… 1976-10-08 Torbjörn Fäll…
+## # … with 4,273 more rows
+```
+
+---
+# Vad är vi intresserade av?
+--
+
+- Vilka ord som nämns
+
+--
+
+- Hur regeringsförklaringen ändrats över tid
+
+--
+
+- Vilka ord som är viktigast
+
+---
+
+# För att analysera text behöver den vara tidy
+
+--
+- Varje variabel är en kolumn
+
+--
+- Varje observation är en rad
+
+--
+- I vårt fall handlar det om varje ord ska vara uppdelat per statsminister och regeringsförklaring
+
+--
+- Data är alltså inte tidy
+
+---
+
+# Vansinnigt enkelt att göra text tidy med `tidytext`
+
+
+```r
+library(tidytext)
+tidy_regf &lt;- regf %&gt;%
+  filter(!str_detect(text, "Regeringsförklaring")) %&gt;%
+* unnest_tokens(ord, text)
+```
+
+---
+
+# Tidy text data
+
+
+```
+## # A tibble: 129,341 x 3
+##    datum      statsminister    ord                
+##    &lt;date&gt;     &lt;chr&gt;            &lt;chr&gt;              
+##  1 1976-10-08 Torbjörn Fälldin regeringspartierna 
+##  2 1976-10-08 Torbjörn Fälldin är                 
+##  3 1976-10-08 Torbjörn Fälldin ense               
+##  4 1976-10-08 Torbjörn Fälldin om                 
+##  5 1976-10-08 Torbjörn Fälldin att                
+##  6 1976-10-08 Torbjörn Fälldin finansdepartementet
+##  7 1976-10-08 Torbjörn Fälldin så                 
+##  8 1976-10-08 Torbjörn Fälldin snart              
+##  9 1976-10-08 Torbjörn Fälldin som                
+## 10 1976-10-08 Torbjörn Fälldin möjligt            
+## # … with 129,331 more rows
+```
+
+---
+
+# Stoppord &amp;#x1F640;
+
+- Ord som *och*, *så*, *att* och så vidare
+- Finns lista i :
+
+```r
+get_stopwords(language = "sv", source = "snowball")
+```
+
+```
+## # A tibble: 114 x 2
+##    word  lexicon 
+##    &lt;chr&gt; &lt;chr&gt;   
+##  1 och   snowball
+##  2 det   snowball
+##  3 att   snowball
+##  4 i     snowball
+##  5 en    snowball
+##  6 jag   snowball
+##  7 hon   snowball
+##  8 som   snowball
+##  9 han   snowball
+## 10 på    snowball
+## # … with 104 more rows
+```
+---
+# Stoppord &amp;#x1F640;
+
+- Kompletterar med lista från forskaren [Peter Dahlgren](https://gist.github.com/peterdalle/8865eb918a824a475b7ac5561f2f88e9) från Göteborgs universitet
+
+
+```r
+sv_stoppord &lt;- read_csv("https://gist.githubusercontent.com/peterdalle/8865eb918a824a475b7ac5561f2f88e9/raw/cc1d05616e489576c1b934289711f041ff9b2281/swedish-stopwords.txt", col_names = FALSE) %&gt;%
+  rename(stoppord = X1)
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   X1 = col_character()
+## )
+```
+
+---
+
+# Tvätta data
+
+
+```r
+tvättade_regf &lt;- tidy_regf %&gt;%
+* filter(!str_detect(ord, "[[:digit:]]")) %&gt;%
+  anti_join(get_stopwords(language = "sv"), by = c("ord" = "word")) %&gt;%
+  anti_join(sv_stoppord, by = c("ord" = "stoppord"))
+```
+
+---
+
+# Tvätta data
+
+
+```r
+tvättade_regf &lt;- tidy_regf %&gt;%
+  filter(!str_detect(ord, "[[:digit:]]")) %&gt;% 
+* anti_join(get_stopwords(language = "sv"), by = c("ord" = "word")) %&gt;%
+  anti_join(sv_stoppord, by = c("ord" = "stoppord"))
+```
+
+---
+
+# Tvätta data
+
+
+```r
+tvättade_regf &lt;- tidy_regf %&gt;%
+  filter(!str_detect(ord, "[[:digit:]]")) %&gt;% 
+  anti_join(get_stopwords(language = "sv"), by = c("ord" = "word")) %&gt;% 
+* anti_join(sv_stoppord, by = c("ord" = "stoppord"))
+```
+
+---
+
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+                                    
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
