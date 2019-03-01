@@ -1,0 +1,331 @@
+---
+title: "Analys av regeringsförklaringar 1976-2019"
+author: "Filip Wästberg"
+date: '2019-01-21'
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+## Bakgrund
+Analytikern Filip Wästberg från Ferrologic Analytics har analyserat alla regeringsförklaringar från 1976 fram till idag. Den första regeringsförklaringen som inte hölls av kungen var Torbjörn Fälldin 1976.
+
+Hur skiljer sig de olika regeringsförklaringarna mot varandra och har Centerpartiet och Liberalernas stöd till regeringen ändrat årets regeringsförklaring?
+
+## Om analysen
+Regeringsförklaringarna är i första hand hämtade från [regeringen.se](https://www.regeringen.se/). De äldre regeringsförklaringarna är hämtade från inscannade dokument från riksdagens arkiv (där datakvalitén kan variera). Samtliga regeringsförklaringar är "tvättade" från stoppord som *och*, *på* eller *men*. 
+
+```{r}
+library(tidyverse)
+library(tidytext)
+library(knitr)
+regf <- read_csv("regf.csv")
+
+sl14_17 <- regf %>%
+  filter(statsminister == "Stefan Löfven")
+
+sl19 <- tibble(text = read_lines("sl2019.txt"),
+               datum = as.Date("2019-01-21"),
+               statsminister = "Stefan Löfven")
+
+sl <- bind_rows(sl14_17, sl19)
+
+tidy_sl <- sl %>%
+  filter(!str_detect(text, "Regeringsförklaring")) %>%
+  unnest_tokens(ord, text)
+
+sv_stoppord <- read_csv("stoppord.csv", locale = locale(encoding = 'latin1'))
+
+tvättade_sl <- tidy_sl %>%
+  filter(!str_detect(ord, "[[:digit:]]")) %>%
+  anti_join(get_stopwords(language = "sv"), by = c("ord" = "word")) %>%
+  anti_join(sv_stoppord, by = c("ord" = "stoppord"))
+
+## regf <- bind_rows(regf, sl %>% filter(datum == "2019-01-21"))
+
+tidy_regf <- regf %>%
+  bind_rows(sl19) %>%
+  filter(!str_detect(text, "Regeringsförklaring")) %>%
+  unnest_tokens(ord, text)
+
+tvättade_regf <- tidy_regf %>%
+  filter(!str_detect(ord, "[[:digit:]]")) %>%
+  anti_join(get_stopwords(language = "sv"), by = c("ord" = "word")) %>%
+  anti_join(sv_stoppord, by = c("ord" = "stoppord"))
+```
+
+Den första frågan är: vilka är de vanligast använda orden i samtliga regeringsförklaringar? 
+
+```{r}
+tvättade_regf %>%
+  count(ord, sort = TRUE) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(ord, n), y = n, fill = ord)) +
+  geom_col() +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Vanligast ord i svenska regeringsförklaringar",
+       subtitle = "Regeringsförklaringar 1976 - 2019",
+       x = "", y = "Antal ord",
+       caption = "Källa: regeringen.se") +
+  scale_fill_viridis_d(guide = FALSE)
+
+ggsave("figure/vanligaste_ord_totalt.png", width = 10)
+```
+
+Att *Sverige* toppar listan är kanske inte så förvånande.
+
+Följfrågan här blir hur det här varierar mellan olika statsministrar. Vem använder vilka ord mest?
+
+```{r}
+tvättade_regf %>%
+  group_by(statsminister) %>%
+  count(ord) %>%
+  arrange(-n) %>%
+  do(head(., n = 10)) %>%
+  ggplot(aes(x = drlib::reorder_within(ord, n, statsminister), y = n, fill = statsminister)) +
+  geom_col() +
+  drlib::scale_x_reordered() +
+  facet_wrap(~statsminister, scales = "free") +
+  coord_flip() +
+  labs(x = "", y = "Antal ord", caption = "Källa: regeringen.se") +
+  scale_fill_viridis_d(guide = FALSE) +
+  theme_minimal()
+
+ggsave("figure/antal_ord_per_statsminister.png", width = 10, height = 8)
+```
+
+Vilka ord är de vanligaste i Stefan Löfvens regeringsförklaringar?
+
+```{r}
+tvättade_sl %>%
+  group_by(ord) %>%
+  filter(!(ord %in% c("herr", "talman"))) %>%
+  summarise(`Antal ord` = n()) %>%
+  arrange(-`Antal ord`) %>%
+  head(10) %>%
+  kable()
+```
+
+
+Hur skiljer sig Stefan Löfvens regeringsförklaringar från 2014 till idag?
+
+```{r}
+tvättade_sl %>%
+  group_by(datum) %>%
+  count(ord) %>%
+  filter(!(ord %in% c("herr", "talman"))) %>%
+  arrange(-n) %>%
+  do(head(., n = 10)) %>%
+  ggplot(aes(x = drlib::reorder_within(ord, n, datum), y = n, fill = as.factor(datum))) +
+  geom_col() +
+  drlib::scale_x_reordered() +
+  facet_wrap(~datum, scales = "free") +
+  coord_flip() +
+  labs(title = "Vanligast ord i Stefan Löfvens regeringsförklaringar 2014-2019", x = "", y = "",
+       caption = "Källa: regeringen.se") +
+  theme_minimal() + 
+  #scale_fill_discrete(guide = FALSE) +
+  scale_fill_viridis_d(guide = FALSE)
+
+ggsave("figure/sl_antal_ord.png", width = 10, height = 8)
+```
+
+Hur har längden på regeringsförklaringar utvecklats över tid? Vi ser en tydlig trend där regeringsförklaringarna blir längre och längre.
+
+```{r}
+tvättade_regf %>%
+  group_by(datum) %>%
+  count(datum) %>%
+  ggplot(aes(x = datum, y = n)) +
+  geom_line() +
+  geom_smooth(method = "loess") +
+  theme_minimal() +
+  labs(title = "Antal ord per regeringsförklaring över tid",
+       subtitle = "Samtliga regeringsförklaringar 1976-2019",
+       y = "Antal ord",
+       x = "",
+       caption = "Källa: regeringen.se") +
+  scale_y_continuous(limits = c(0,3500))
+
+ggsave("figure/antal_ord_totalt_over_tid.png", width = 10)
+```
+
+Och hur ser det ut specifikt för Stefan Löfven?
+
+```{r}
+tvättade_sl %>%
+    group_by(datum) %>%
+  count(datum) %>%
+  ggplot(aes(x = datum, y = n)) +
+  geom_line() +
+  theme_minimal() +
+  labs(title = "Antal ord per regeringsförklaring över tid",
+       subtitle = "Statsminister: Stefan Löfven",
+       y = "Antal ord",
+       x = "", 
+       caption = "Källa: regeringen.se") +
+  scale_y_continuous(limits = c(0,2500))
+
+ggsave("figure/sl_over_tid.png", width = 10)
+```
+
+Det är tydligt att regeringsförklaringarna blivit längre. Samtidigt är det relativt stor variation över tid. Vilken statsminister hade längst regeringsförklaringar? Nedan ser vi medelvärde för antal ord per regeringsförklaring för varje statsminister. 
+
+```{r}
+tvättade_regf %>%
+  group_by(statsminister, datum) %>%
+  summarise(antal_ord = n()) %>%
+  group_by(statsminister) %>%
+  summarise(mv_ord = mean(antal_ord)) %>% 
+  ggplot(aes(x = reorder(statsminister, mv_ord),
+             y = mv_ord, fill = statsminister)) +
+  geom_col() +
+  coord_flip() +
+  labs(y = "Medelvärde antal ord",
+       x = "",
+       title = "Medelvärde antal ord per regeringförklaring",
+       caption = "Källa: regeringen.se") +
+  theme_minimal() +
+  scale_fill_viridis_d() +
+  guides(fill = FALSE)
+
+ggsave("figure/medelvarde_antal_ord.png", width = 10)
+```
+
+## Vilka är Stefan Löfvens viktigaste ord?
+Att Reinfeldt nämner arbete, ansvar och jobb är inte förvånande och har ett visst analysvärde, men att Olof Palme nämner regeringen flest gånger har inget större analytiskt värde, det gör i princip alla andra statsministrar också.
+
+Det här är ett vanligt problem i analys av text. En metod för att hantera det här och istället identifiera de *viktigaste* orden i en text är så kallad *term frequency–inverse document frequency (tf-idf)*[saknar svensk översättning]. Principen är, enkelt uttryckt, att väga upp ord som inte används ofta och väga ner de som används nästan hela tiden. Metoden utvecklades av matematikern Karen Spärck Jones. Resultatet av analysen fångar vilka ord som är "viktigast" för Stefan Löfvens respektive regeringsförklaringar.
+
+```{r}
+tvättade_sl %>%
+  group_by(datum) %>%
+  count(ord) %>%
+  bind_tf_idf(ord, datum, n) %>%
+  arrange(-tf_idf) %>%
+  do(head(., n = 10)) %>%
+  ggplot(aes(x = drlib::reorder_within(ord, tf_idf, datum), y = tf_idf, fill = as.factor(datum))) +
+  geom_col() +
+  drlib::scale_x_reordered() +
+  facet_wrap(~datum, scale = "free_y") +
+  coord_flip() +
+  labs(title = "Stefan Löfvens viktigaste ord", x = "", y = "",
+       caption = "Källa: regeringen.se") +
+  scale_fill_viridis_d(guide = FALSE) +
+  theme_minimal()
+
+ggsave("figure/sl_viktigaste_ord.png", width = 10, height = 8)
+```
+
+Vi är intresserade av är hur olika ord hänger samman i Stefan Löfvens regeringsförklaringar. Nedan redovisas relationen mellan ord i Löfvens regeringsförklaringar.
+
+```{r}
+bigram_regf <- sl %>%
+  filter(!is.na(statsminister) & !str_detect(text, "Regeringsförklaring")) %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+
+library(tidyr)
+bigrams_separated <- bigram_regf %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
+
+bigrams_filtered <- bigrams_separated %>%
+  filter_at(vars(word1, word2), all_vars(!. %in% sv_stoppord$stoppord))
+
+# new bigram counts:
+bigram_counts <- bigrams_filtered %>% 
+  count(word1, word2, sort = TRUE)
+
+
+bigrams_united <- bigrams_filtered %>%
+  unite(bigram, word1, word2, sep = " ")
+
+
+bigram_tf_idf <- bigrams_united %>%
+  count(statsminister, bigram) %>%
+  bind_tf_idf(bigram, statsminister, n) %>%
+  arrange(desc(tf_idf))
+
+library(igraph)
+library(ggraph)
+library(dplyr)
+bigram_graph <- bigram_counts %>%
+  filter(n > 3) %>%
+  graph_from_data_frame()
+
+set.seed(2017)
+
+ggraph(bigram_graph, layout = "fr") +
+  geom_edge_link() +
+  geom_node_point() +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+
+ggsave("figure/sl_relation_mellan_ord.png", width = 10)
+```
+
+Nedan analyserar vi relationen mellan ord i alla regeringsförklaringar.
+
+Med `tidytext` gör vi det genom att specificera hur många `ngrams` vi vill använda. Under motorhuven används här paketet `tokenizers`.
+
+```{r}
+bigram_regf <- regf %>%
+  filter(!is.na(statsminister)) %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+bigram_regf
+
+bigrams_separated <- bigram_regf %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
+
+bigrams_filtered <- bigrams_separated %>%
+  filter_at(vars(word1, word2), all_vars(!. %in% sv_stoppord$stoppord))
+
+# new bigram counts:
+bigram_counts <- bigrams_filtered %>% 
+  count(word1, word2, sort = TRUE)
+
+bigrams_united <- bigrams_filtered %>%
+  unite(bigram, word1, word2, sep = " ")
+
+bigram_tf_idf <- bigrams_united %>%
+  count(statsminister, bigram) %>%
+  bind_tf_idf(bigram, statsminister, n) %>%
+  arrange(desc(tf_idf))
+
+bigram_graph <- bigram_counts %>%
+  filter(n > 15) %>%
+  graph_from_data_frame()
+
+set.seed(2017)
+
+ggraph(bigram_graph, layout = "fr") +
+  geom_edge_link() +
+  geom_node_point() +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+
+ggsave("figure/relation-mellan-ord.png")
+```
+
+Nedan tar vi fram viktigast ord för respektive statsminister.
+
+```{r}
+tvättade_regf %>%
+  group_by(statsminister) %>%
+  count(ord) %>%
+  bind_tf_idf(ord, statsminister, n) %>%
+  arrange(-tf_idf) %>%
+  do(head(., n = 10)) %>%
+  ggplot(aes(x = drlib::reorder_within(ord, tf_idf, statsminister), y = tf_idf, fill = statsminister)) +
+  geom_col() +
+  drlib::scale_x_reordered() +
+  facet_wrap(~statsminister, scales = "free") +
+  coord_flip() +
+  labs(x = "", y = "Antal ord") +
+  scale_fill_viridis_d(guide = FALSE)
+
+ggsave("figure/tot_viktigaste_ord.png", width = 10, height = 8)
+```
