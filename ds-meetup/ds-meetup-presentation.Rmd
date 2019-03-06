@@ -297,6 +297,12 @@ ggraph(bigram_graph, layout = "fr") +
 
 - Zipfs law
 
+```{r echo=FALSE, out.width = "300px", fig.align="center"}
+knitr::include_graphics(
+  "ds-meetup-presentation_files/figure-html/george-zipf.jpg"
+  )
+```
+
 ---
 
 ```{r echo=FALSE, fig.height = 10, fig.width = 16, message=FALSE}
@@ -326,14 +332,37 @@ Foto Från: University of Cambridge, <a href="https://creativecommons.org/licens
 
 # Term frequency–inverse document frequency
 
-$$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$
+$$ tf-idf(term) = tf(term) * idf(term) $$
 --
 
+$$ tf(term) = f_t$$
+
+--
+
+
+$$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$
+---
+
+# Term frequency–inverse document frequency
+ 
 - Skapar en vikt för ord baserat på hur ofta de förekommer i varje regeringsförklaring 
 
 --
 
 - Kombinera med *term frequency* och vi kan ta fram de "viktigaste" orden för repsektive statsminister
+---
+
+# Term frequency–inverse document frequency
+
+- Exempel:
+
+--
+
+- Sveriges regering sätter kampen mot **arbetslösheten** främst
+
+--
+
+- Sverige regering sätter kampen mot **terrorism** främst
 
 ---
 

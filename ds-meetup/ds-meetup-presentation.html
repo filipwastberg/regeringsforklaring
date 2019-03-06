@@ -236,9 +236,11 @@ tvättade_regf &lt;- tidy_regf %&gt;%
 
 - Zipfs law
 
+&lt;img src="ds-meetup-presentation_files/figure-html/george-zipf.jpg" width="300px" style="display: block; margin: auto;" /&gt;
+
 ---
 
-![](ds-meetup-presentation_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -252,18 +254,41 @@ Foto Från: University of Cambridge, &lt;a href="https://creativecommons.org/lic
 
 # Term frequency–inverse document frequency
 
-`$$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$`
+$$ tf-idf(term) = tf(term) * idf(term) $$
 --
 
+$$ tf(term) = f_t$$
+
+--
+
+
+`$$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$`
+---
+
+# Term frequency–inverse document frequency
+ 
 - Skapar en vikt för ord baserat på hur ofta de förekommer i varje regeringsförklaring 
 
 --
 
 - Kombinera med *term frequency* och vi kan ta fram de "viktigaste" orden för repsektive statsminister
+---
+
+# Term frequency–inverse document frequency
+
+- Exempel:
+
+--
+
+- Sveriges regering sätter kampen mot **arbetslösheten** främst
+
+--
+
+- Sverige regering sätter kampen mot **terrorism** främst
 
 ---
 
-![](ds-meetup-presentation_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
 
 ---
 - filip.wastberg@ferrologic.se
