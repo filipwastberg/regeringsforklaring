@@ -212,6 +212,98 @@ tvättade_regf &lt;- tidy_regf %&gt;%
 ![](ds-meetup-presentation_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
                                     
 ---
+
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+---
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+---
+
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+                                    
+---
+
+
+```
+## 
+## Attaching package: 'igraph'
+```
+
+```
+## The following objects are masked from 'package:dplyr':
+## 
+##     as_data_frame, groups, union
+```
+
+```
+## The following objects are masked from 'package:purrr':
+## 
+##     compose, simplify
+```
+
+```
+## The following object is masked from 'package:tidyr':
+## 
+##     crossing
+```
+
+```
+## The following object is masked from 'package:tibble':
+## 
+##     as_data_frame
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     decompose, spectrum
+```
+
+```
+## The following object is masked from 'package:base':
+## 
+##     union
+```
+
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+---
+
+# Vilka är de viktigaste orden för respektive statsminister?
+
+---
+
+# Texten är skev!
+
+- Zipfs law
+
+---
+
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+---
+
+# Karen Spärck Jones 
+
+&lt;img src="ds-meetup-presentation_files/figure-html/karen.jpg" width="300px" /&gt;
+
+Foto Från: University of Cambridge, &lt;a href="https://creativecommons.org/licenses/by/2.5" title="Creative Commons Attribution 2.5"&gt;CC BY 2.5&lt;/a&gt; &lt;a href="https://commons.wikimedia.org/w/index.php?curid=4734533"&gt;&lt;/a&gt;
+
+---
+
+# Term frequency–inverse document frequency
+
+`$$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$`
+--
+- Skapar en vikt för ord baserat på hur ofta de förekommer i varje regeringsförklaring 
+
+--
+- Kombinera med *term frequency* och vi kan ta fram de "viktigaste" orden för repsektive statsminister
+
+---
+
+![](ds-meetup-presentation_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
