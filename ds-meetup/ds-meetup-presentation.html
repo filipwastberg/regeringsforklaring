@@ -37,7 +37,7 @@ class: center, middle, inverse, title-slide
 
 ```r
 library(tidyverse)
-regf &lt;- read_csv("regf.csv")
+regf &lt;- read_csv("data/regf.csv")
 ```
 
 ---
@@ -224,48 +224,6 @@ tvättade_regf &lt;- tidy_regf %&gt;%
                                     
 ---
 
-
-```
-## 
-## Attaching package: 'igraph'
-```
-
-```
-## The following objects are masked from 'package:dplyr':
-## 
-##     as_data_frame, groups, union
-```
-
-```
-## The following objects are masked from 'package:purrr':
-## 
-##     compose, simplify
-```
-
-```
-## The following object is masked from 'package:tidyr':
-## 
-##     crossing
-```
-
-```
-## The following object is masked from 'package:tibble':
-## 
-##     as_data_frame
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     decompose, spectrum
-```
-
-```
-## The following object is masked from 'package:base':
-## 
-##     union
-```
-
 ![](ds-meetup-presentation_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
 
 ---
@@ -296,14 +254,20 @@ Foto Från: University of Cambridge, &lt;a href="https://creativecommons.org/lic
 
 `$$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$`
 --
+
 - Skapar en vikt för ord baserat på hur ofta de förekommer i varje regeringsförklaring 
 
 --
+
 - Kombinera med *term frequency* och vi kan ta fram de "viktigaste" orden för repsektive statsminister
 
 ---
 
 ![](ds-meetup-presentation_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+
+---
+- filip.wastberg@ferrologic.se
+- All kod för presentationen: https://github.com/filipwastberg/regeringsforklaring
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

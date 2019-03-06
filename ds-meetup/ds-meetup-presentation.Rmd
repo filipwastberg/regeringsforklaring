@@ -46,7 +46,7 @@ mono_light(
 
 ```{r ladda_data, message=FALSE, warning=FALSE}
 library(tidyverse)
-regf <- read_csv("regf.csv")
+regf <- read_csv("data/regf.csv")
 ```
 
 ---
@@ -353,7 +353,9 @@ tvättade_regf %>%
   text_theme()
 ```
 
-
+---
+- filip.wastberg@ferrologic.se
+- All kod för presentationen: https://github.com/filipwastberg/regeringsforklaring
 
 
 
