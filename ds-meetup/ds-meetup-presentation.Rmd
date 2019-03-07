@@ -2,7 +2,7 @@
 title: "Textanalys av Sveriges regeringsförklaring"
 subtitle: "&#x1F57A; med R och tidytext"
 author: "Filip Wästberg, Ferrologic"
-date: "2018-03-06"
+date: "2019-03-06"
 output:
   xaringan::moon_reader:
     lib_dir: libs

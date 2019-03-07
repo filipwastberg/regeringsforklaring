@@ -4,7 +4,7 @@
     <title>Textanalys av Sveriges regeringsförklaring</title>
     <meta charset="utf-8">
     <meta name="author" content="Filip Wästberg, Ferrologic" />
-    <meta name="date" content="2018-03-06" />
+    <meta name="date" content="2019-03-06" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -14,7 +14,7 @@ class: center, middle, inverse, title-slide
 # Textanalys av Sveriges regeringsförklaring
 ## 🕺 med R och tidytext
 ### Filip Wästberg, Ferrologic
-### 2018-03-06
+### 2019-03-06
 
 ---
 
@@ -49,17 +49,17 @@ regf &lt;- read_csv("data/regf.csv")
 ## # A tibble: 4,283 x 3
 ##    text                                           datum      statsminister 
 ##    &lt;chr&gt;                                          &lt;date&gt;     &lt;chr&gt;         
-##  1 Regeringsförklaring, 19761008, Torbjörn Fälld… 1976-10-08 Torbjörn Fäll…
-##  2 Regeringspartierna är ense om att finansdepar… 1976-10-08 Torbjörn Fäll…
-##  3 I anslutning till denna anmälan vill jag ge r… 1976-10-08 Torbjörn Fäll…
-##  4 Enighet har alltså nåtts mellan Centerpartiet… 1976-10-08 Torbjörn Fäll…
-##  5 Med fasthet och ansvar skall vi föra en polit… 1976-10-08 Torbjörn Fäll…
-##  6 Regeringen skall sträva efter att bryta tende… 1976-10-08 Torbjörn Fäll…
-##  7 Tryggheten för alla generationer och grupper … 1976-10-08 Torbjörn Fäll…
-##  8 Den sociala marknadshushållningen förstärks g… 1976-10-08 Torbjörn Fäll…
-##  9 Regeringen skall föra en politik för sysselsä… 1976-10-08 Torbjörn Fäll…
-## 10 Sträng hushållning måste ske med naturtillgån… 1976-10-08 Torbjörn Fäll…
-## # … with 4,273 more rows
+##  1 Regeringsförklaring, 19761008, Torbjörn Fälld~ 1976-10-08 Torbjörn Fäll~
+##  2 Regeringspartierna är ense om att finansdepar~ 1976-10-08 Torbjörn Fäll~
+##  3 I anslutning till denna anmälan vill jag ge r~ 1976-10-08 Torbjörn Fäll~
+##  4 Enighet har alltså nåtts mellan Centerpartiet~ 1976-10-08 Torbjörn Fäll~
+##  5 Med fasthet och ansvar skall vi föra en polit~ 1976-10-08 Torbjörn Fäll~
+##  6 Regeringen skall sträva efter att bryta tende~ 1976-10-08 Torbjörn Fäll~
+##  7 Tryggheten för alla generationer och grupper ~ 1976-10-08 Torbjörn Fäll~
+##  8 Den sociala marknadshushållningen förstärks g~ 1976-10-08 Torbjörn Fäll~
+##  9 Regeringen skall föra en politik för sysselsä~ 1976-10-08 Torbjörn Fäll~
+## 10 Sträng hushållning måste ske med naturtillgån~ 1976-10-08 Torbjörn Fäll~
+## # ... with 4,273 more rows
 ```
 
 ---
@@ -123,7 +123,7 @@ tidy_regf &lt;- regf %&gt;%
 ##  8 1976-10-08 Torbjörn Fälldin snart              
 ##  9 1976-10-08 Torbjörn Fälldin som                
 ## 10 1976-10-08 Torbjörn Fälldin möjligt            
-## # … with 129,331 more rows
+## # ... with 129,331 more rows
 ```
 
 ---
@@ -151,7 +151,7 @@ get_stopwords(language = "sv", source = "snowball")
 ##  8 som   snowball
 ##  9 han   snowball
 ## 10 på    snowball
-## # … with 104 more rows
+## # ... with 104 more rows
 ```
 ---
 # Stoppord &amp;#x1F640;

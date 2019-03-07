@@ -1,8 +1,19 @@
-# Analys av samtliga regeringsförklaringar 1976-2017
-Denna repository innehåller en deskriptiv analys av alla regeringsförklaringar från 1976 till idag.
+Analys av samtliga regeringsförklaringar 1976-2019
+==================================================
 
-- I `regf.csv` finns data strukturerad så att ungefär varje rad är en mening.
-- I `sl2019.txt` finns 2019 års regeringsförklaring. Den kommer så småning om att slås ihop med `regf.csv`.
-- Koden och dokumentation för analysen finns i `analys_regeringsforklaringar.Rmd`
+Denna repository innehåller analys av Sveriges regeringsförklaring.
 
-För att köra koden behöver du R med version 3.5.1 och RStudio. Du klonar då ner koden, installerar de paket som används och kan sedan reproducera koden.
+-   I mappen `svd` finns kod för den analys som gjordes [för
+    SvD](https://www.svd.se/mer-mittenpolitik--sa-har-lofvens-retorik-forandrats)
+    i samband med att regeringen tillträdde i januari.
+-   I mappen `ds-meetup` finns kod och en presentation som hölls på
+    Stockholm Data Science Meetup i mars 2019.
+-   I `data` finns alla regeringsförklaringar
+-   I `regf.csv` i `data` finns data strukturerad så att ungefär varje
+    rad är en mening.
+-   I `sl2019.txt` finns 2019 års regeringsförklaring. Den kommer så
+    småning om att slås ihop med `regf.csv`.
+
+För att köra koden behöver du R med version 3.5.1 och RStudio. Du klonar
+då ner koden, installerar de paket som används och kan sedan reproducera
+koden.
